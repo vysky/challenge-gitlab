@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = "1-070f4087-playground-sandbox"
+  default = "1-4b8d97ca-playground-sandbox"
 }
 
 variable "location" {
@@ -38,9 +38,8 @@ resource "azurerm_network_security_group" "main" {
   resource_group_name = var.rg
   location            = var.location
 
-  # allow all inbound traffic
   security_rule {
-    name                       = "rule-inbound"
+    name                       = "AllowAllInbound"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
@@ -51,9 +50,8 @@ resource "azurerm_network_security_group" "main" {
     destination_address_prefix = "*"
   }
 
-  # allow all outbound traffic
   security_rule {
-    name                       = "rule-outbound"
+    name                       = "AllowAllOutbound"
     priority                   = 100
     direction                  = "Outbound"
     access                     = "Allow"
@@ -72,16 +70,25 @@ resource "azurerm_public_ip" "main" {
   location            = var.location
   allocation_method   = "Static"
   sku                 = "Standard" # require "standard" if using availability zone
-  availability_zone   = 1 # allocate the public ip in availability zone 1
+  availability_zone   = 1          # allocate the public ip in availability zone 1
   domain_name_label   = random_string.fqdn.result
 }
 
 # create virtual network
 resource "azurerm_virtual_network" "main" {
   name                = "gitlab-vn"
-  address_space       = ["10.0.0.0/16"]
   resource_group_name = var.rg
   location            = var.location
+  address_space       = ["10.0.0.0/16"]
+
+  /*
+  # aleternative way to create subnet and associate nsg
+  subnet {
+    name           = "gitlab-subnet"
+    address_prefix = ["10.0.10.0/24"]
+    security_group = azurerm_network_security_group.main.id # # associate the created nsg with subnet
+  }
+  */
 }
 
 # create subnet
@@ -90,6 +97,12 @@ resource "azurerm_subnet" "main" {
   resource_group_name  = var.rg
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.0.10.0/24"]
+}
+
+# associate nsg with subnet
+resource "azurerm_subnet_network_security_group_association" "main" {
+  subnet_id                 = azurerm_subnet.main.id
+  network_security_group_id = azurerm_network_security_group.main.id
 }
 
 # create network interface
@@ -110,21 +123,22 @@ resource "azurerm_network_interface" "main" {
 
 # create vm
 resource "azurerm_virtual_machine" "gitlab-vm" {
-  name                  = "gitlab-vm"
-  resource_group_name   = var.rg
-  location              = var.location
-  vm_size               = "Standard_D2s_v3"
-  network_interface_ids = [azurerm_network_interface.main.id]
-  zones                 = [1] # allocate the vm in availability zone 1, need to be in the same zone as public ip
+  name                          = "gitlab-vm"
+  resource_group_name           = var.rg
+  location                      = var.location
+  vm_size                       = "Standard_D2s_v3"
+  network_interface_ids         = [azurerm_network_interface.main.id]
+  delete_os_disk_on_termination = true # delete os disk automatically when deleting vm
+  zones                         = [1]  # allocate the vm in availability zone 1, need to be in the same zone as public ip
 
-  # required if use azure platform image from azure marketplace
+  # require if using azure platform image from azure marketplace
   plan {
     publisher = "gitlabinc1586447921813"
     product   = "gitlabee"
     name      = "default"
   }
 
-  # to provision the vm with azure platform image from azure marketplace
+  # provision the vm with azure platform image from azure marketplace
   storage_image_reference {
     publisher = "gitlabinc1586447921813"
     offer     = "gitlabee"
@@ -134,8 +148,8 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
 
   os_profile {
     computer_name  = "gitlab-host"
-    admin_username = "gitlabadmin"
-    admin_password = "Qwerty123!"
+    admin_username = "azureuser"
+    admin_password = "Qwerty123456!"
   }
 
   os_profile_linux_config {
@@ -143,7 +157,7 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   }
 
   storage_os_disk {
-    name              = "gitlab-disk"
+    name              = "gitlab-os-disk"
     caching           = "ReadWrite"
     create_option     = "FromImage"
     managed_disk_type = "Premium_LRS"
