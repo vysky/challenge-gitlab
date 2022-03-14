@@ -115,7 +115,7 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   location              = var.location
   vm_size               = "Standard_D2s_v3"
   network_interface_ids = [azurerm_network_interface.main.id]
-  zones                 = [1]
+  zones                 = [1] # allocate the vm in availability zone 1, need to be in the same zone as public ip
 
   # required if use azure platform image from azure marketplace
   plan {
