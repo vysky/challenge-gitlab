@@ -15,11 +15,19 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = "1-4b8d97ca-playground-sandbox"
+  default = "1-0ccecd2e-playground-sandbox"
 }
 
 variable "location" {
   default = "eastus"
+}
+
+variable "username" {
+  default = "azureuser"
+}
+
+variable "password" {
+  default = "Qwerty123456!"
 }
 
 # generate random string for domain_name_label under public ip
@@ -148,8 +156,8 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
 
   os_profile {
     computer_name  = "gitlab-host"
-    admin_username = "azureuser"
-    admin_password = "Qwerty123456!"
+    admin_username = var.username
+    admin_password = var.password
   }
 
   os_profile_linux_config {
@@ -170,6 +178,37 @@ output "public_ip" {
   value = azurerm_public_ip.main.ip_address
 }
 
+output "private_ip" {
+  value = azurerm_network_interface.main.private_ip_address
+}
+
 output "fqdn" {
   value = azurerm_public_ip.main.fqdn
 }
+
+/* ---------- ansible ---------- */
+
+/*
+resource "local_file" "inventory" {
+  content = azurerm_network_interface.main.private_ip_address
+  filename = "./inventory"
+}
+
+resource "local_file" "password" {
+  content = var.password
+  filename = "./password"
+}
+
+resource "null_resource" "ansible" {
+  connection {
+    type     = "ssh"
+    user     = var.username
+    password = var.password
+    host     = azurerm_public_ip.main.ip_address
+  }
+
+  provisioner "terraforemote-exec" {
+    inline = ["ansible-playbook main.yml"]
+  }
+}
+*/

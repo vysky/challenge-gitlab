@@ -1,0 +1,18 @@
+---
+  - hosts: all
+    tasks:
+      - name: clear gitlab.rb
+        lineinfile:
+          path: /etc/gitlab/gitlab.rb
+          regexp: ".*"
+          state: absent
+      - name: add external url
+        lineinfile:
+          path: /etc/gitlab/gitlab.rb
+          line: "external_url 'https://uncwig.eastus.cloudapp.azure.com'"
+      - name: add letsencrypt
+        lineinfile:
+          path: /etc/gitlab/gitlab.rb
+          line: "letsencrypt['enable'] = true"
+      - name: reconfigure
+        shell: gitlab-ctl reconfigure
