@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = ""
+  default = "1-d818bae5-playground-sandbox"
 }
 
 variable "location" {
@@ -207,17 +207,10 @@ resource "local_file" "password" {
   file_permission = "0644"
 }
 
-/*
 resource "null_resource" "ansible" {
-  connection {
-    type     = "ssh"
-    user     = var.username
-    password = var.password
-    host     = azurerm_public_ip.main.ip_address
-  }
+  depends_on = [azurerm_virtual_machine.gitlab-vm]
 
-  provisioner "terraforemote-exec" {
-    inline = ["ansible-playbook main.yml"]
+  provisioner "local-exec" {
+    command = "ansible-playbook main.yml"
   }
 }
-*/
