@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = "1-729a880c-playground-sandbox"
+  default = ""
 }
 
 variable "location" {
