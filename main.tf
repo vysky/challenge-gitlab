@@ -188,7 +188,6 @@ output "fqdn" {
 
 /* ---------- ansible ---------- */
 
-/*
 resource "local_file" "inventory" {
   content = azurerm_network_interface.main.private_ip_address
   filename = "./inventory"
@@ -199,6 +198,7 @@ resource "local_file" "password" {
   filename = "./password"
 }
 
+/*
 resource "null_resource" "ansible" {
   connection {
     type     = "ssh"
