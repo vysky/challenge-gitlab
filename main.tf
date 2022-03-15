@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = "1-0ccecd2e-playground-sandbox"
+  default = ""
 }
 
 variable "location" {
@@ -189,12 +189,17 @@ output "fqdn" {
 /* ---------- ansible ---------- */
 
 resource "local_file" "inventory" {
-  content = azurerm_network_interface.main.private_ip_address
+  content  = azurerm_public_ip.main.ip_address
   filename = "./inventory"
 }
 
+resource "local_file" "fqdn" {
+  content  = azurerm_public_ip.main.fqdn
+  filename = "./fqdn"
+}
+
 resource "local_file" "password" {
-  content = var.password
+  content  = var.password
   filename = "./password"
 }
 
