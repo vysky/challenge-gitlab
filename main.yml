@@ -1,5 +1,8 @@
 ---
   - hosts: all
+    vars:
+      fqdn_file: ./fqdn
+      var_fqdn: "{{ lookup('file', fqdn_file).splitlines() }}"
     tasks:
       - name: clear gitlab.rb
         lineinfile:
@@ -9,7 +12,7 @@
       - name: add external url
         lineinfile:
           path: /etc/gitlab/gitlab.rb
-          line: "external_url 'https://uncwig.eastus.cloudapp.azure.com'"
+          line: "external_url 'https://{{ var_fqdn[0] }}'"
       - name: add letsencrypt
         lineinfile:
           path: /etc/gitlab/gitlab.rb

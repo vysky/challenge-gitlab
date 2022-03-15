@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = ""
+  default = "1-729a880c-playground-sandbox"
 }
 
 variable "location" {
@@ -191,16 +191,19 @@ output "fqdn" {
 resource "local_file" "inventory" {
   content  = azurerm_public_ip.main.ip_address
   filename = "./inventory"
+  file_permission = "0644"
 }
 
 resource "local_file" "fqdn" {
   content  = azurerm_public_ip.main.fqdn
   filename = "./fqdn"
+  file_permission = "0644"
 }
 
 resource "local_file" "password" {
   content  = var.password
   filename = "./password"
+  file_permission = "0644"
 }
 
 /*
