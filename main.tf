@@ -147,6 +147,7 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   }
 
   # provision the vm with azure platform image from azure marketplace
+  # use https://docs.microsoft.com/cli/azure/vm/image to find what values to use
   storage_image_reference {
     publisher = "gitlabinc1586447921813"
     offer     = "gitlabee"
