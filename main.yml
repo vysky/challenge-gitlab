@@ -1,3 +1,6 @@
+# mac fixes for sshpass https://stackoverflow.com/a/62623099
+# brew install hudochenkov/sshpass/sshpass
+
 ---
   - hosts: all
     vars:
