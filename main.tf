@@ -15,7 +15,7 @@ provider "azurerm" {
 /* ---------- variables ---------- */
 
 variable "rg" {
-  default = "1-d818bae5-playground-sandbox"
+  default = "1-ad497250-playground-sandbox"
 }
 
 variable "location" {
@@ -140,9 +140,9 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   zones                         = [1]  # allocate the vm in availability zone 1, need to be in the same zone as public ip
 
   # require if using azure platform image from azure marketplace
-    # Use https://vincentlauzon.com/2018/01/10/finding-a-vm-image-reference-publisher-sku/ 
-  # to find the image reference in the future. 
-  # Alternatively, use `az vm image list --offer gitlabee --all`
+  # use https://vincentlauzon.com/2018/01/10/finding-a-vm-image-reference-publisher-sku/
+  # to find the image reference in the future
+  # alternatively, use `az vm image list --offer gitlabee --all`
   plan {
     publisher = "gitlabinc1586447921813"
     product   = "gitlabee"
@@ -150,7 +150,7 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   }
 
   # provision the vm with azure platform image from azure marketplace
-  # use https://docs.microsoft.com/cli/azure/vm/image to find what values to use
+  # use https://docs.microsoft.com/cli/azure/vm/image to find what command to find publisher, offer and sku
   storage_image_reference {
     publisher = "gitlabinc1586447921813"
     offer     = "gitlabee"
@@ -210,10 +210,32 @@ resource "local_file" "password" {
   file_permission = "0644"
 }
 
+/*
 resource "null_resource" "ansible" {
   depends_on = [azurerm_virtual_machine.gitlab-vm]
 
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt -yes install gpg-agent",
+      "curl 'https://gitlab-org.gitlab.io/omnibus-gitlab/gitlab_new_gpg.key' --output /tmp/omnibus_gitlab_gpg.key",
+      "sudo apt-key add /tmp/omnibus_gitlab_gpg.key",
+      "sudo apt update",
+      "sudo apt upgrade",
+      "sudo apt --yes install gitlab-ee",
+      "sudo gitlab-ctl restart",
+      "sleep 300"
+    ]
+
+    connection {
+      host     = azurerm_public_ip.main.ip_address
+      type     = "ssh"
+      user     = var.username
+      password = var.password
+    }
+  }
+
   provisioner "local-exec" {
-    command = "ansible-playbook main.yml"
+    command = "ansible-playbook main.yml -e 'ansible_python_interpreter=/usr/bin/python3'"
   }
 }
+*/
