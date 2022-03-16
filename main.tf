@@ -140,6 +140,9 @@ resource "azurerm_virtual_machine" "gitlab-vm" {
   zones                         = [1]  # allocate the vm in availability zone 1, need to be in the same zone as public ip
 
   # require if using azure platform image from azure marketplace
+    # Use https://vincentlauzon.com/2018/01/10/finding-a-vm-image-reference-publisher-sku/ 
+  # to find the image reference in the future. 
+  # Alternatively, use `az vm image list --offer gitlabee --all`
   plan {
     publisher = "gitlabinc1586447921813"
     product   = "gitlabee"
