@@ -42,11 +42,7 @@ ensure you have the following prepared and installed on your machine
 
 note
 
-while terraform will report the deployment is completed, the resources are still spining up in the background in azure and will not be ready straight away
-
-thus it is recommended to wait for around 5 to 10 mins before proceeding to the next step
-
-though you are encouraged to try and experiment with this for your own learning
+while terraform will report the deployment is completed, the resources are still being spun up in the background in azure and will not be ready straight away, thus it is recommended to wait for around 10 mins before proceeding to the next step
 
 ---
 
@@ -89,6 +85,8 @@ example instructions for az cli to find the sku of gitlab by first finding the `
 
 ## work in progress
 
-working in integrating ansible script into terraform script so the automation is seemless
+working in integrating both terraform script and ansible script so the automation is seemless (code is already present in the `main.tf` file)
 
-currently there is issue when immediately run the ansible script after resouces are deployed through terraform
+currently there is an issue `failed to connect to the host via ssh: shared connection to <ip address> closed.` if we run ansible playbook right after terraform has deployed the resources
+
+i believe it is due to the vm closing the ssh connection as one of the ansible tasks is to wait and check for bitnami credential
